@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-4.0.xsd
+       http://www.springframework.org/schema/jdbc
+       http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+    <!-- 扫描类包，将标注Spring注解的类自动转化为Bean，同时完成Bean的注入  -->
+    <context:component-scan base-package="com.book.dao"/>
+    <context:component-scan base-package="com.book.service"/>
+
+    <!--  定义一个使用DBCP实现的数据源 -->
+    <!-- <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+          destroy-method="close"
+          p:driverClassName="com.mysql.jdbc.Driver"
+          p:url="jdbc:mysql://localhost:3306/library"
+          p:username="root"
+          p:password="0000"/> -->
+    <bean id="dataSource" class="org.h2.jdbcx.JdbcConnectionPool"
+          destroy-method="dispose">
+        <constructor-arg>
+            <bean class="org.h2.jdbcx.JdbcDataSource">
+                <!-- 内存模式 -->
+                <property name="URL" value="jdbc:h2:mem:library"/>
+                <!-- 文件模式 -->
+                <!-- <property name="URL" value="jdbc:h2:file:~/.h2/library" /> -->
+                <property name="user" value="sa"/>
+                <property name="password" value="sa"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+    <!-- 定义JDBC模板Bean   -->
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate"
+          p:dataSource-ref="dataSource"/>
+
+    <!-- 初始化数据表结构 -->
+    <jdbc:initialize-database data-source="dataSource">
+        <jdbc:script location="classpath:library.sql" encoding="UTF-8"/>
+    </jdbc:initialize-database>
+</beans>
